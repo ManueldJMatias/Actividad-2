@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="index.html" class="navbar-brand">Utilería.js</a>
+        <ul class="navbar-links">
+            <li><a href="index.html">Formulario</a></li>
+            <li><a href="login.html" class="active">Login</a></li>
+        </ul>
+    </nav>
+
+    <div class="login-container">
+        <div class="login-card">
+            <h2>Iniciar Sesión</h2>
+            <p class="subtitle">Ingresa tus credenciales</p>
+
+            <form id="loginForm" novalidate>
+                <div class="form-group">
+                    <label for="loginCorreo">Correo electrónico</label>
+                    <input type="email" id="loginCorreo" placeholder="tu@correo.com">
+                    <div class="form-hint" id="loginCorreoHint"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Contraseña</label>
+                    <input type="password" id="loginPassword" placeholder="Tu contraseña">
+                    <div class="password-strength">
+                        <div class="bar" id="lbar1"></div>
+                        <div class="bar" id="lbar2"></div>
+                        <div class="bar" id="lbar3"></div>
+                        <div class="bar" id="lbar4"></div>
+                    </div>
+                    <div class="form-hint" id="loginPasswordHint"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" id="btnLogin">
+                    Ingresar
+                </button>
+
+                <div class="resultado" id="loginResultado"></div>
+
+                <div class="divider">o</div>
+
+                <a href="index.html" class="btn btn-secondary btn-block">
+                    Crear una cuenta
+                </a>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>Utilería.js - Manuel Matias 2026</p>
+    </footer>
+
+    <script src="js/utileria.js"></script>
+    <script>
+        var loginCorreo = document.getElementById("loginCorreo");
+        var loginPass = document.getElementById("loginPassword");
+        var loginForm = document.getElementById("loginForm");
+
+        // validar correo mientras escribe
+        loginCorreo.addEventListener("input", function() {
+            var hint = document.getElementById("loginCorreoHint");
+            if (this.value == "") {
+                this.className = "";
+                hint.textContent = "";
+                hint.className = "form-hint";
+            } else if (validarCorreo(this.value)) {
+                this.className = "valid";
+                hint.textContent = "✓ Correo válido";
+                hint.className = "form-hint success";
+            } else {
+                this.className = "invalid";
+                hint.textContent = "✗ Formato inválido";
+                hint.className = "form-hint error";
+            }
+        });
+
+        // validar password mientras escribe
+        loginPass.addEventListener("input", function() {
+            var hint = document.getElementById("loginPasswordHint");
+            var val = this.value;
+            var bars = [
+                document.getElementById("lbar1"),
+                document.getElementById("lbar2"),
+                document.getElementById("lbar3"),
+                document.getElementById("lbar4")
+            ];
+
+            for (var i = 0; i < bars.length; i++) {
+                bars[i].className = "bar";
+            }
+
+            if (val == "") {
+                this.className = "";
+                hint.textContent = "";
+                hint.className = "form-hint";
+                return;
+            }
+
+            var puntos = 0;
+            if (val.length >= 8) puntos++;
+            if (/[A-Z]/.test(val)) puntos++;
+            if (/[0-9]/.test(val)) puntos++;
+            if (/[!@#$%^&*()_+\-=\[\]{}|;:'",.<>?\/~`\\]/.test(val)) puntos++;
+
+            var nivel;
+            if (puntos <= 1) nivel = "weak";
+            else if (puntos <= 3) nivel = "medium";
+            else nivel = "strong";
+
+            for (var i = 0; i < puntos; i++) {
+                bars[i].className = "bar active " + nivel;
+            }
+
+            if (validarPassword(val)) {
+                this.className = "valid";
+                hint.textContent = "✓ Contraseña segura";
+                hint.className = "form-hint success";
+            } else {
+                this.className = "invalid";
+                var faltan = [];
+                if (val.length < 8) faltan.push("8+ caracteres");
+                if (!/[A-Z]/.test(val)) faltan.push("mayúscula");
+                if (!/[a-z]/.test(val)) faltan.push("minúscula");
+                if (!/[0-9]/.test(val)) faltan.push("número");
+                if (!/[!@#$%^&*()_+\-=\[\]{}|;:'",.<>?\/~`\\]/.test(val)) faltan.push("especial");
+                hint.textContent = "Falta: " + faltan.join(", ");
+                hint.className = "form-hint error";
+            }
+        });
+
+        // al darle submit al form de login
+        loginForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            var resultado = document.getElementById("loginResultado");
+            var errores = [];
+
+            if (!validarCorreo(loginCorreo.value)) {
+                errores.push("Correo inválido");
+            }
+            if (!validarPassword(loginPass.value)) {
+                errores.push("Contraseña no cumple los requisitos");
+            }
+
+            if (errores.length > 0) {
+                resultado.className = "resultado show error";
+                resultado.innerHTML = errores.join(" | ");
+            } else {
+                resultado.className = "resultado show success";
+                resultado.innerHTML = "¡Inicio de sesión exitoso!";
+            }
+        });
+    </script>
+</body>
+</html>
